@@ -5,30 +5,85 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   </head>
   <body>
-    <ul class="messages"></ul>
+	<div>
+	<canvas id="myCanvas" width="700" height="500" style="border:1px solid #000000;">
+    </canvas>
+	</div>
+	<div>
 	
-      <input class="mtext" autocomplete="off" />
-	  <button class="send">Send</button>
+	<input class="mtext" autocomplete="off" />
+	<button class="send">Send</button>
+	<ul class="messages"></ul>
+	</div>
   </body>
   <script src="/socket.io/socket.io.js"></script>
+  
 <script>
   var socket = io();
 </script>
+  
 <script>
+	var c = document.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	var mouseclicked = false;
+	
+	$('#myCanvas').on('mousedown', function(e){
+		console.log(e.pageX-$(this).offset().left);
+		console.log(e.pageY-$(this).offset().top);
+		mouseclicked?mouseclicked=false:mouseclicked=true;
+	});
+	
+	$('#myCanvas').on('mousemove', function(e){
+	
+		if(mouseclicked == true){
+			myObject = {
+				x: e.pageX-$(this).offset().left,
+				y: e.pageY-$(this).offset().top
+			}
+			socket.emit('draw', myObject);
+			ctx.beginPath();
+			ctx.arc((e.pageX-$(this).offset().left), (e.pageY-$(this).offset().top), 2, 0, 2 * Math.PI, false);
+			ctx.fillStyle = 'black';
+			ctx.fill();
+		}
+		
+	});
+	
+	 $('#myCanvas').on('mouseup', function(e){
+		console.log(e.pageX-$(this).offset().left);
+		console.log(e.pageY-$(this).offset().top);
+		mouseclicked?mouseclicked=false:mouseclicked=true;
+	});
+</script>
+		
+		
+		
+<script>
+
 $('.send').on('click',function(){
 	socket.emit('message', $('.mtext').val());
-})
+});
 
 socket.on('message', function(msg){
-  $('.messages').append($('<li>').text(msg));
+  $('.messages').prepend($('<li>').text(msg));
 });
 
 socket.on('init', function(msg){
 	console.log(msg);
 	$.each(msg,function(key,value){
-		$('.messages').append($('<li>').text(value));
+		$('.messages').prepend($('<li>').text(value));
 	});
 });
+
+socket.on('draw', function(msg){
+	ctx.beginPath();
+	ctx.arc(msg.x, msg.y, 2, 0, 2 * Math.PI, false);
+	ctx.fillStyle = 'black';
+	ctx.fill();
+});
 </script>
+
+
+		
 </html>
 
