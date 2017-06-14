@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO Chat App</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <ul class="messages"></ul>
+	
+      <input class="mtext" autocomplete="off" />
+	  <button class="send">Send</button>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io();
+</script>
+<script>
+$('.send').on('click',function(){
+	socket.emit('message', $('.mtext').val());
+})
+
+socket.on('message', function(msg){
+  $('.messages').append($('<li>').text(msg));
+});
+
+socket.on('init', function(msg){
+	console.log(msg);
+	$.each(msg,function(key,value){
+		$('.messages').append($('<li>').text(value));
+	});
+});
+</script>
+</html>
+
